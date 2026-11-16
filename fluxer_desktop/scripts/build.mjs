@@ -72,6 +72,15 @@ let embeddedBuildVersion = process.env.BUILD_VERSION || '';
 const modulesEnabled = process.env.FLUXER_MODULES === '1' || process.env.FLUXER_MODULES === 'true';
 const offlineBuild = process.env.FLUXER_OFFLINE === '1' || process.env.FLUXER_OFFLINE === 'true';
 const packageLaunchCommand = process.env.FLUXER_LAUNCH_COMMAND || '';
+const defaultInstance = readBuildUrl('FLUXER_DEFAULT_INSTANCE');
+const defaultPackageOrigin = readBuildUrl('FLUXER_DEFAULT_PACKAGE_ORIGIN');
+function readBuildUrl(name) {
+	const value = (process.env[name] || '').trim();
+	if (value.length > 0 && !value.startsWith('https://')) {
+		throw new Error(`${name} must be an absolute https:// URL, got ${JSON.stringify(value)}.`);
+	}
+	return value;
+}
 function buildInfoDefines() {
 	return {
 		[BUILD_CHANNEL_DEFINE]: JSON.stringify(buildChannel),
@@ -79,6 +88,8 @@ function buildInfoDefines() {
 		'process.env.FLUXER_MODULES': JSON.stringify(modulesEnabled ? '1' : ''),
 		'process.env.FLUXER_OFFLINE': JSON.stringify(offlineBuild ? '1' : ''),
 		'process.env.FLUXER_LAUNCH_COMMAND': JSON.stringify(packageLaunchCommand),
+		'process.env.FLUXER_DEFAULT_INSTANCE': JSON.stringify(defaultInstance),
+		'process.env.FLUXER_DEFAULT_PACKAGE_ORIGIN': JSON.stringify(defaultPackageOrigin),
 	};
 }
 const electronExternals = [
