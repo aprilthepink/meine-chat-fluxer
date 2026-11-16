@@ -218,6 +218,10 @@ export function desktopRuntimeInitialInput(): string | null {
 	return getLaunchInstanceEndpointOverride() ?? buildDefaultInstanceEndpoint();
 }
 
+export function isDesktopInstanceLocked(): boolean {
+	return process.env.FLUXER_LOCK_INSTANCE === '1' && buildDefaultInstanceEndpoint() !== null;
+}
+
 function buildDefaultInstanceEndpoint(): string | null {
 	const raw = process.env.FLUXER_DEFAULT_INSTANCE?.trim() ?? '';
 	if (raw.length === 0) {

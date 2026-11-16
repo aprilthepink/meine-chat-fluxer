@@ -74,6 +74,7 @@ const offlineBuild = process.env.FLUXER_OFFLINE === '1' || process.env.FLUXER_OF
 const packageLaunchCommand = process.env.FLUXER_LAUNCH_COMMAND || '';
 const defaultInstance = readBuildUrl('FLUXER_DEFAULT_INSTANCE');
 const defaultPackageOrigin = readBuildUrl('FLUXER_DEFAULT_PACKAGE_ORIGIN');
+const lockInstance = ['1', 'true'].includes(process.env.FLUXER_LOCK_INSTANCE || '');
 function readBuildUrl(name) {
 	const value = (process.env[name] || '').trim();
 	if (value.length > 0 && !value.startsWith('https://')) {
@@ -90,6 +91,7 @@ function buildInfoDefines() {
 		'process.env.FLUXER_LAUNCH_COMMAND': JSON.stringify(packageLaunchCommand),
 		'process.env.FLUXER_DEFAULT_INSTANCE': JSON.stringify(defaultInstance),
 		'process.env.FLUXER_DEFAULT_PACKAGE_ORIGIN': JSON.stringify(defaultPackageOrigin),
+		'process.env.FLUXER_LOCK_INSTANCE': JSON.stringify(lockInstance ? '1' : ''),
 	};
 }
 const electronExternals = [

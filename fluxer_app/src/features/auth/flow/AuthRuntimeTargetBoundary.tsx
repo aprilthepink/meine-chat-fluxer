@@ -6,6 +6,7 @@ import RuntimeConfig from '@app/features/app/state/RuntimeConfig';
 import authPageStyles from '@app/features/auth/flow/AuthPageStyles.module.css';
 import {AuthRouteLoadError} from '@app/features/auth/flow/AuthRouteLoadError';
 import {AuthShellLoadingState} from '@app/features/auth/flow/AuthShellLoadingState';
+import {isDesktopInstanceLocked} from '@app/features/auth/flow/auth_login_core/AuthLoginInstanceStep';
 import {useAuthLayoutContext} from '@app/features/auth/state/AuthLayoutContext';
 import {
 	AuthRuntimeTarget,
@@ -226,7 +227,11 @@ function ResolvedDesktopAuthRuntimeTargetBoundary({
 	readonly snapshot: RuntimeConfigSnapshot | null;
 	readonly children: ReactNode;
 }) {
-	const [target] = useState(() => AuthRuntimeTarget.forInstanceSelection(snapshot));
+	const [target] = useState(() =>
+		snapshot !== null && isDesktopInstanceLocked()
+			? AuthRuntimeTarget.forFixedInstance(snapshot)
+			: AuthRuntimeTarget.forInstanceSelection(snapshot),
+	);
 	return (
 		<AuthRuntimeTargetProvider
 			target={target}
@@ -262,7 +267,7 @@ function DesktopAuthRuntimeResolutionError({
 	onChooseDifferentInstance,
 }: {
 	readonly retry: () => void;
-	readonly onChooseDifferentInstance: () => void;
+	readonly onChooseDifferentInstance: (() => void) | null;
 }) {
 	return (
 		<div
@@ -294,14 +299,16 @@ function DesktopAuthRuntimeResolutionError({
 				>
 					<Trans>Try again</Trans>
 				</Button>
-				<Button
-					variant="secondary"
-					onClick={onChooseDifferentInstance}
-					fitContainer
-					data-flx="auth.flow.auth-runtime-target-boundary.desktop-auth-runtime-resolution-error.button.choose-different-instance"
-				>
-					<Trans>Choose a different instance</Trans>
-				</Button>
+				{onChooseDifferentInstance == null ? null : (
+					<Button
+						variant="secondary"
+						onClick={onChooseDifferentInstance}
+						fitContainer
+						data-flx="auth.flow.auth-runtime-target-boundary.desktop-auth-runtime-resolution-error.button.choose-different-instance"
+					>
+						<Trans>Choose a different instance</Trans>
+					</Button>
+				)}
 			</div>
 		</div>
 	);
@@ -328,7 +335,7 @@ function DesktopAuthRuntimeTargetBoundary({children}: {readonly children: ReactN
 		return (
 			<DesktopAuthRuntimeResolutionError
 				retry={retry}
-				onChooseDifferentInstance={handleChooseDifferentInstance}
+				onChooseDifferentInstance={isDesktopInstanceLocked() ? null : handleChooseDifferentInstance}
 				data-flx="auth.flow.auth-runtime-target-boundary.desktop-auth-runtime-target-boundary.desktop-auth-runtime-resolution-error"
 			/>
 		);

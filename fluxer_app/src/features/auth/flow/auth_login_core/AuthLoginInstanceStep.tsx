@@ -9,7 +9,11 @@ import {flxElementClassName} from '@app/lib/react';
 import type {ReactNode} from 'react';
 
 export function shouldRenderInstanceStep(): boolean {
-	return hasDesktopAppStore();
+	return hasDesktopAppStore() && !isDesktopInstanceLocked();
+}
+
+export function isDesktopInstanceLocked(): boolean {
+	return getElectronAPI()?.capabilities?.instanceLocked === true;
 }
 
 function hasDesktopAppStore(): boolean {
