@@ -112,7 +112,7 @@ const CUSTOM_TITLEBAR_HEIGHT = '32px';
 const NATIVE_TITLEBAR_HEIGHT = '0px';
 const STARTUP_NATIVE_TITLEBAR_ID = 'fluxer-startup-native-titlebar';
 const SERVED_PRODUCT_NAME_SELECTOR = 'meta[name="apple-mobile-web-app-title"]:not([data-fluxer-branding])';
-const DESKTOP_CAPABILITY_MANIFEST_KEYS = Object.freeze(['appStore', 'gatewaySocket'] as const);
+const DESKTOP_CAPABILITY_MANIFEST_KEYS = Object.freeze(['appStore', 'gatewaySocket', 'instanceLocked'] as const);
 
 class DesktopCapabilityManifestContractError extends TypeError {
 	public constructor(reason: string, options?: ErrorOptions) {
@@ -373,7 +373,7 @@ function readDesktopCapabilityManifest(): DesktopCapabilityManifest {
 	const manifest = readExactPlainRecord({value, expectedKeys: DESKTOP_CAPABILITY_MANIFEST_KEYS});
 	if (manifest === null) {
 		throw new DesktopCapabilityManifestContractError(
-			'the main process response must be a plain object with exactly appStore and gatewaySocket',
+			'the main process response must be a plain object with exactly appStore, gatewaySocket and instanceLocked',
 		);
 	}
 	if (typeof manifest.appStore !== 'boolean') {
@@ -382,7 +382,10 @@ function readDesktopCapabilityManifest(): DesktopCapabilityManifest {
 	if (typeof manifest.gatewaySocket !== 'boolean') {
 		throw new DesktopCapabilityManifestContractError('gatewaySocket must be a boolean');
 	}
-	return {appStore: manifest.appStore, gatewaySocket: manifest.gatewaySocket};
+	if (typeof manifest.instanceLocked !== 'boolean') {
+		throw new DesktopCapabilityManifestContractError('instanceLocked must be a boolean');
+	}
+	return {appStore: manifest.appStore, gatewaySocket: manifest.gatewaySocket, instanceLocked: manifest.instanceLocked};
 }
 
 function reportPrebootTheme(renderer: typeof ipcRenderer): void {

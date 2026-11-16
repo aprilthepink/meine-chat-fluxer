@@ -5,4 +5,5 @@ export const DESKTOP_CAPABILITY_MANIFEST_CHANNEL = 'desktop-capability-manifest:
 export interface DesktopCapabilityManifest {
 	readonly appStore: boolean;
 	readonly gatewaySocket: boolean;
+	readonly instanceLocked: boolean;
 }

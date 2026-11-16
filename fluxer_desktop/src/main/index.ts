@@ -60,6 +60,7 @@ import {
 import {recordDesktopLastRoute} from '@electron/main/DesktopLastRoute';
 import {cleanupDesktopOutboundHTTP} from '@electron/main/DesktopOutboundHTTP';
 import {registerDesktopRuntimeConfigHandlers} from '@electron/main/DesktopRuntimeConfigIpc';
+import {isDesktopInstanceLocked} from '@electron/main/DesktopRuntimeDiscovery';
 import {installDesktopSystemTrustVerifier} from '@electron/main/DesktopSystemTrustVerifier';
 import {destroyDesktopTray, hasActiveDesktopTray, initializeDesktopTray} from '@electron/main/DesktopTray';
 import {cleanupDesktopTrustedCertificates} from '@electron/main/DesktopTrustedCertificates';
@@ -373,6 +374,7 @@ const resolveDesktopCapabilityManifest = (): DesktopCapabilityManifest => {
 		desktopCapabilityManifest = {
 			appStore: loadAppStoreAddon(),
 			gatewaySocket: loadNativeAddon(GATEWAY_SOCKET_ADDON_PACKAGE, loadGatewaySocketBinding),
+			instanceLocked: isDesktopInstanceLocked(),
 		};
 		log.info('[Capabilities] Desktop capability manifest', desktopCapabilityManifest);
 	}
@@ -437,12 +439,12 @@ export function initializeMainWindowStartup(): void {
 			.then(() => {
 				if (event.sender.isDestroyed()) return;
 				event.returnValue = hasQuitStarted()
-					? {appStore: false, gatewaySocket: false}
+					? {appStore: false, gatewaySocket: false, instanceLocked: isDesktopInstanceLocked()}
 					: resolveDesktopCapabilityManifest();
 			})
 			.catch((error: unknown) => {
 				log.error('[Capabilities] Failed to resolve the desktop capability manifest:', error);
-				event.returnValue = {appStore: false, gatewaySocket: false};
+				event.returnValue = {appStore: false, gatewaySocket: false, instanceLocked: isDesktopInstanceLocked()};
 			});
 	});
 	ipcMain.on(ACCOUNT_ENGINE_CHANNELS.isAvailable, (event) => {
