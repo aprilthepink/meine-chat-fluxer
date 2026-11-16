@@ -1,0 +1,55 @@
+stages:
+  - build
+
+workflow:
+  rules:
+    - if: $CI_COMMIT_BRANCH == "trunk"
+    - if: $CI_PIPELINE_SOURCE == "web"
+
+variables:
+  CARGO_HOME: $CI_PROJECT_DIR/.cache/cargo
+  RUSTUP_HOME: $CI_PROJECT_DIR/.cache/rustup
+  npm_config_store_dir: $CI_PROJECT_DIR/.cache/pnpm-store
+  ELECTRON_CACHE: $CI_PROJECT_DIR/.cache/electron-download
+  ELECTRON_BUILDER_CACHE: $CI_PROJECT_DIR/.cache/electron-builder
+  USE_SYSTEM_FPM: "true"
+
+.desktop-linux:
+  stage: build
+  image: node:26
+  cache:
+    key: fluxer-desktop-linux
+    paths:
+      - .cache/
+  before_script:
+    - apt-get update
+    - >-
+      apt-get install -y --no-install-recommends
+      libx11-dev libxtst-dev libxt-dev libxinerama-dev libxkbcommon-dev libxrandr-dev
+      ruby ruby-dev build-essential binutils cmake meson ninja-build nasm rpm desktop-file-utils appstream
+      libpixman-1-dev libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
+      libpipewire-0.3-dev libspa-0.2-dev libdbus-1-dev libudev-dev libhunspell-dev libcbor-dev libssl-dev
+      zlib1g-dev pkg-config libegl-dev libclang-dev clang llvm libpulse-dev xvfb
+    - gem install --no-document fpm
+    - curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --default-toolchain 1.98.1 --target wasm32-unknown-unknown
+    - source "$CARGO_HOME/env"
+    - npm install --global pnpm@11.27.0
+    - pnpm install --frozen-lockfile
+  script:
+    - whitelabel/desktop/build.sh "$CTX" --linux --x64
+    - mkdir -p artifacts && cp fluxer_desktop/dist-electron/*.{AppImage,deb,rpm,tar.gz} artifacts/
+  artifacts:
+    name: meine-$CTX-linux-$CI_PIPELINE_IID
+    paths:
+      - artifacts/
+    expire_in: 30 days
+
+desktop:linux:pdl:
+  extends: .desktop-linux
+  variables:
+    CTX: pdl
+
+desktop:linux:ljs:
+  extends: .desktop-linux
+  variables:
+    CTX: ljs
