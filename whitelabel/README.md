@@ -14,6 +14,7 @@ checkout per context). For `--linux` it downloads Fluxer's patched Electron from
 - `desktop/<ctx>.json`: brand, passed as `FLUXER_DESKTOP_BRAND` (overrides the stable channel in `fluxer_desktop/electron-builder.config.cjs`)
 - `desktop/<ctx>.env`: build env
   - `FLUXER_DEFAULT_INSTANCE`: instance offered on first launch, no instance picker needed
+  - `FLUXER_LOCK_INSTANCE`: no instance picker or "change instance" in the login
   - `FLUXER_DEFAULT_PACKAGE_ORIGIN`: update server; must never be empty, or the app updates itself to official Fluxer
 - `brand/<ctx>/`: logo (white) and colour, same as in the Oxygen fork
 - `desktop/icons/<ctx>/`: generated, regenerate with
@@ -34,7 +35,6 @@ Module updates (`FLUXER_MODULES`) stay off.
 
 ## TODO
 
-- Hide "change instance" in the login (`fluxer_app`)
 - macOS icons (`_compiled/`, `AppIcon.icon`), Windows badges, tray icon for pdl is hard to read at 16px
 - Own update server, download page (`DOWNLOAD_PAGE_URLS`), deep link scheme (still `fluxer://`)
 - Windows/macOS builds and signing
