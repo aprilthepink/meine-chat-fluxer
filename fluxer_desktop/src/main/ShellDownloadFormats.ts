@@ -28,11 +28,19 @@ function isUsablePackageOrigin(value: string): boolean {
 	return url.protocol === 'https:' || (url.protocol === 'http:' && DESKTOP_PACKAGE_LOOPBACK_HOSTS.has(url.hostname));
 }
 
+function defaultPackageOrigin(): string {
+	const buildDefault = process.env.FLUXER_DEFAULT_PACKAGE_ORIGIN?.trim() ?? '';
+	if (BUILD_CHANNEL !== 'development' && buildDefault.length > 0 && isUsablePackageOrigin(buildDefault)) {
+		return buildDefault.replace(/\/+$/u, '');
+	}
+	return CHANNEL_PACKAGE_ORIGINS[BUILD_CHANNEL];
+}
+
 export function resolveDesktopPackageOrigin(): string {
 	const override = process.env?.[PACKAGE_ORIGIN_ENV];
 	const trimmed = override?.trim() ?? '';
 	if (trimmed.length === 0 || !isUsablePackageOrigin(trimmed)) {
-		return CHANNEL_PACKAGE_ORIGINS[BUILD_CHANNEL];
+		return defaultPackageOrigin();
 	}
 	return trimmed.replace(/\/+$/u, '');
 }

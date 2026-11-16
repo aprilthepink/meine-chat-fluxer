@@ -61,6 +61,15 @@ if (!channel) {
 	throw new Error(`Unsupported BUILD_CHANNEL: ${buildChannel}. Expected one of ${Object.keys(CHANNELS).join(', ')}`);
 }
 
+if (process.env.FLUXER_DESKTOP_BRAND) {
+	const brand = JSON.parse(readFileSync(path.resolve(process.env.FLUXER_DESKTOP_BRAND), 'utf8'));
+	const unknownKeys = Object.keys(brand).filter((key) => !(key in channel));
+	if (unknownKeys.length > 0) {
+		throw new Error(`FLUXER_DESKTOP_BRAND has unknown keys: ${unknownKeys.join(', ')}`);
+	}
+	Object.assign(channel, brand);
+}
+
 const isCanary = buildChannel === 'canary';
 const isStable = buildChannel === 'stable';
 const platformArguments = new Set(process.argv.map((argument) => argument.split('=', 1)[0]));

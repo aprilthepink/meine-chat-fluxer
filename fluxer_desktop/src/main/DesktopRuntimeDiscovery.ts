@@ -215,7 +215,16 @@ async function restoreRememberedRuntimePlanAt(
 }
 
 export function desktopRuntimeInitialInput(): string | null {
-	return getLaunchInstanceEndpointOverride();
+	return getLaunchInstanceEndpointOverride() ?? buildDefaultInstanceEndpoint();
+}
+
+function buildDefaultInstanceEndpoint(): string | null {
+	const raw = process.env.FLUXER_DEFAULT_INSTANCE?.trim() ?? '';
+	if (raw.length === 0) {
+		return null;
+	}
+	const endpoint = normalizeInstanceEndpoint(raw, InstanceEndpointKind.API);
+	return endpoint != null && endpoint.includes('://') ? endpoint : null;
 }
 
 async function fetchRuntimePlan(
