@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# Build the whitelabel desktop app: ./whitelabel/desktop/build.sh <pdl|ljs> [electron-builder args, e.g. --linux]
+# Usage: whitelabel/desktop/build.sh <pdl|ljs> [electron-builder args, e.g. --linux]  (ELECTRON_ARCH, default x64)
 set -euo pipefail
 
 ctx="${1:?usage: $0 <pdl|ljs> [electron-builder args]}"
 shift
 root="$(cd "$(dirname "$0")/../.." && pwd)"
 dir="$root/whitelabel/desktop"
-[[ -f "$dir/$ctx.env" && -f "$dir/$ctx.json" ]] || { echo "unknown context: $ctx" >&2; exit 1; }
+[[ -f "$dir/$ctx.env" && -f "$dir/$ctx.json" && -d "$dir/icons/$ctx" ]] || { echo "unknown context: $ctx" >&2; exit 1; }
 
 set -a
 # shellcheck source=/dev/null
@@ -14,6 +14,24 @@ source "$dir/$ctx.env"
 set +a
 export FLUXER_DESKTOP_BRAND="$dir/$ctx.json"
 
+cp "$dir/icons/$ctx/"* "$root/fluxer_desktop/build_resources/icons-stable/"
+
+if [[ " $* " == *" --linux "* && -z "${FLUXER_ELECTRON_DIST:-}" ]]; then
+  arch="${ELECTRON_ARCH:-x64}"
+  runtime="$root/fluxer_desktop/electron/runtime.json"
+  read -r tag version sha < <(node -e '
+    const r = require(process.argv[1]);
+    console.log(r.releaseTag, r.electronVersion, r.linux[process.argv[2]].archiveSha256);
+  ' "$runtime" "$arch")
+  export FLUXER_ELECTRON_DIST="$root/.cache/electron/$tag"
+  mkdir -p "$FLUXER_ELECTRON_DIST"
+  base="https://github.com/fluxerapp/fluxer/releases/download/$tag/electron-v$version-linux-$arch"
+  for file in "$base.zip" "$base.fluxer.json"; do
+    [[ -f "$FLUXER_ELECTRON_DIST/$(basename "$file")" ]] || curl -fsSL -o "$FLUXER_ELECTRON_DIST/$(basename "$file")" "$file"
+  done
+  echo "$sha  $FLUXER_ELECTRON_DIST/electron-v$version-linux-$arch.zip" | sha256sum -c -
+fi
+
 cd "$root/fluxer_desktop"
-pnpm run build
+NODE_ENV=production FLUXER_DESKTOP_PRODUCTION=true pnpm run build
 pnpm exec electron-builder --config electron-builder.config.cjs "$@"
