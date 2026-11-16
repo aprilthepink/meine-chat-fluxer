@@ -1,0 +1,12 @@
+{
+  "productName": "Meine Linke Chat",
+  "linuxOptDirName": "meine-linke-chat",
+  "artifactProductName": "Meine-Linke-Chat",
+  "appId": "de.dielinke.meine.pdl",
+  "packageName": "meine_linke_chat",
+  "linuxPackageName": "meine-linke-chat",
+  "linuxDesktopId": "de.dielinke.meine.pdl",
+  "linuxComment": "Chat für Mitglieder der Linken",
+  "notarize": false,
+  "provisioningProfile": null
+}

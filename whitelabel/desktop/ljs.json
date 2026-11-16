@@ -1,0 +1,12 @@
+{
+  "productName": "Meine LJS Chat",
+  "linuxOptDirName": "meine-ljs-chat",
+  "artifactProductName": "Meine-LJS-Chat",
+  "appId": "de.dielinke.meine.ljs",
+  "packageName": "meine_ljs_chat",
+  "linuxPackageName": "meine-ljs-chat",
+  "linuxDesktopId": "de.dielinke.meine.ljs",
+  "linuxComment": "Chat für Mitglieder der Linksjugend ['solid]",
+  "notarize": false,
+  "provisioningProfile": null
+}
