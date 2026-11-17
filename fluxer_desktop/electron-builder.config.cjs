@@ -61,13 +61,22 @@ if (!channel) {
 	throw new Error(`Unsupported BUILD_CHANNEL: ${buildChannel}. Expected one of ${Object.keys(CHANNELS).join(', ')}`);
 }
 
-if (process.env.FLUXER_DESKTOP_BRAND) {
+const BRAND_METADATA_KEYS = ['author', 'homepage', 'description'];
+const isRebranded = Boolean(process.env.FLUXER_DESKTOP_BRAND);
+const brandMetadata = {};
+if (isRebranded) {
 	const brand = JSON.parse(readFileSync(path.resolve(process.env.FLUXER_DESKTOP_BRAND), 'utf8'));
-	const unknownKeys = Object.keys(brand).filter((key) => !(key in channel));
+	const unknownKeys = Object.keys(brand).filter((key) => !(key in channel) && !BRAND_METADATA_KEYS.includes(key));
 	if (unknownKeys.length > 0) {
 		throw new Error(`FLUXER_DESKTOP_BRAND has unknown keys: ${unknownKeys.join(', ')}`);
 	}
-	Object.assign(channel, brand);
+	for (const [key, value] of Object.entries(brand)) {
+		if (BRAND_METADATA_KEYS.includes(key)) {
+			brandMetadata[key] = value;
+		} else {
+			channel[key] = value;
+		}
+	}
 }
 
 const isCanary = buildChannel === 'canary';
@@ -123,10 +132,10 @@ const legacyLinuxStablePackageNames = {
 	'.deb': legacyLinuxStableDebPackageName,
 	'.rpm': legacyLinuxStableRpmPackageName,
 };
-const legacyLinuxStableDebFpmArgs = isStable
+const legacyLinuxStableDebFpmArgs = isStable && !isRebranded
 	? ['--replaces', legacyLinuxStableDebPackageName, '--conflicts', legacyLinuxStableDebPackageName]
 	: [];
-const legacyLinuxStableRpmFpmArgs = isStable
+const legacyLinuxStableRpmFpmArgs = isStable && !isRebranded
 	? ['--replaces', legacyLinuxStableRpmPackageName, '--conflicts', legacyLinuxStableRpmPackageName]
 	: [];
 const legacyLinuxCanaryOptDir = '/opt/Fluxer Canary';
@@ -1676,12 +1685,13 @@ async function verifyLinuxPackagesDeclareTheLegacyStableReplacement(buildResult)
 			...(replaces.includes(legacyName) ? ['replaces'] : []),
 			...(conflicts.includes(legacyName) ? ['conflicts'] : []),
 		];
-		if (!isStable && declared.length > 0) {
+		const replacesLegacy = isStable && !isRebranded;
+		if (!replacesLegacy && declared.length > 0) {
 			violations.push({
 				artifactPath,
-				detail: `${buildChannel} declares ${declared.join(' and ')} on ${legacyName}, which belongs to stable only`,
+				detail: `${isRebranded ? 'rebranded build' : buildChannel} declares ${declared.join(' and ')} on ${legacyName}, which belongs to stable only`,
 			});
-		} else if (isStable && declared.length !== 2) {
+		} else if (replacesLegacy && declared.length !== 2) {
 			violations.push({
 				artifactPath,
 				detail: `stable declares ${declared.join(' and ') || 'neither'} on ${legacyName}, expected both`,
@@ -1739,6 +1749,7 @@ module.exports = {
 		name: metadataName,
 		...(shellVersion ? {version: shellVersion} : {}),
 		...(targetPlatform === 'linux' ? {desktopName: `${linuxDesktopId}.desktop`} : {}),
+		...brandMetadata,
 	},
 	extraResources: [
 		{
