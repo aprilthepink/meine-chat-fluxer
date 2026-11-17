@@ -25,7 +25,7 @@ Module updates (`FLUXER_MODULES`) stay off.
 
 ## CI
 
-`.gitlab-ci.yml` builds AppImage, deb, rpm and tar.gz for x64 on `trunk` and uploads them to the package registry
+`.gitlab-ci.yml` builds AppImage, deb, rpm and tar.gz for x64 on `trunk` (Ubuntu 22.04 like upstream, glibc 2.35 baseline) and uploads them to the package registry
 (`meine-<ctx>-linux/<pipeline>/`). System dependencies come from upstream's `tools/ci` step `install_linux_deps`.
 No CI cache: the runners' cache URL is misconfigured (`https://https://...`).
 

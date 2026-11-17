@@ -16,10 +16,19 @@ variables:
 
 .desktop-linux:
   stage: build
-  image: node:26
+  image: ubuntu:22.04
   before_script:
     - apt-get update
-    - apt-get install -y --no-install-recommends sudo llvm
+    - >-
+      DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends
+      ca-certificates curl xz-utils git sudo build-essential python3 llvm
+    - |
+      node_dist=https://nodejs.org/dist/latest-v26.x
+      node_file=$(curl -fsSL "$node_dist/SHASUMS256.txt" | awk '/linux-x64\.tar\.xz$/ {print $2}')
+      curl -fsSL -o "/tmp/$node_file" "$node_dist/$node_file"
+      (cd /tmp && curl -fsSL "$node_dist/SHASUMS256.txt" | grep " $node_file\$" | sha256sum -c -)
+      tar -xJf "/tmp/$node_file" -C /usr/local --strip-components=1
+      node --version
     - curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --default-toolchain 1.98.1 --target wasm32-unknown-unknown
     - source "$CARGO_HOME/env"
     - cargo run --locked --quiet --manifest-path tools/ci/Cargo.toml -- build-desktop --step install_linux_deps
