@@ -39,7 +39,7 @@ if (body) {
 	css += `:root,:root.platform-windows:not(.windows-fluxer-sans){--font-sans-primary:'${body.family}';}`;
 }
 if (heading) {
-	css += `h1,h2{font-family:'${heading.family}',var(--font-sans);letter-spacing:${heading.letter_spacing ?? 'normal'};}`;
+	css += `h1,h2{font-family:'${heading.family}',var(--font-sans)!important;letter-spacing:${heading.letter_spacing ?? 'normal'}!important;}`;
 }
 css += '[data-flx="auth.components.auth-brand-panel.host"]{display:none;}';
 
@@ -58,10 +58,7 @@ patch('packages/desktop_ipc/src/NativeTitlebarShell.ts', [
 ]);
 patch('fluxer_app/index.html', [
 	[/<meta name="apple-mobile-web-app-title" content="[^"]*">/, `<meta name="apple-mobile-web-app-title" content="${escapeHtml(name)}">`],
-	[
-		/<\/head>/,
-		`<style id="fluxer-instance-theme-color" data-color="${brand.color}"></style>\n` +
-			`<style id="fluxer-instance-custom-css">${css}</style>\n</head>`,
-	],
+	[/<\/head>/, `<style id="fluxer-instance-theme-color" data-color="${brand.color}"></style>\n</head>`],
+	[/<\/body>/, `<style id="fluxer-instance-custom-css">${css}</style>\n</body>`],
 ]);
 console.log(`brand.mjs: ${ctx} applied (${name})`);
