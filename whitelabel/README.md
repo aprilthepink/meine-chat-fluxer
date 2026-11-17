@@ -16,7 +16,7 @@ checkout per context). For `--linux` it downloads Fluxer's patched Electron from
   - `FLUXER_DEFAULT_INSTANCE`: instance offered on first launch, no instance picker needed
   - `FLUXER_LOCK_INSTANCE`: no instance picker or "change instance" in the login
   - `FLUXER_DEFAULT_PACKAGE_ORIGIN`: update server; must never be empty, or the app updates itself to official Fluxer
-- `brand/<ctx>/`: logo (white) and colour, same as in the Oxygen fork
+- `brand/<ctx>/`: logo (white; pdl: the wedge of the Die Linke logo, ljs: the arrow) and colour, same as in the Oxygen fork
   - `brand.json`: colour, product name, fonts, wordmark text
   - `wordmark.svg`/`.png`: generated from `brand.json` in Work Sans, regenerate with
     `nix-shell -p librsvg 'python3.withPackages (ps: [ps.fonttools ps.uharfbuzz])' --run 'python3 whitelabel/tools/generate_wordmarks.py WorkSans[wght].ttf'`
@@ -45,7 +45,7 @@ No CI cache: the runners' cache URL is misconfigured (`https://https://...`).
 
 ## TODO
 
-- macOS icons (`_compiled/`, `AppIcon.icon`), Windows badges, tray icon for pdl is hard to read at 16px
+- macOS icons (`_compiled/`, `AppIcon.icon`), Windows badges
 - Package maintainer is a placeholder (`noreply@…` in `desktop/<ctx>.json`)
 - Own update server, download page (`DOWNLOAD_PAGE_URLS`), deep link scheme (still `fluxer://`)
 - Windows/macOS builds and signing
