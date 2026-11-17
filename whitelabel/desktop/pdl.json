@@ -9,7 +9,10 @@
   "linuxComment": "Chat für Mitglieder der Linken",
   "notarize": false,
   "provisioningProfile": null,
-  "author": "Die Linke <noreply@die-linke.de>",
+  "author": {
+    "name": "Die Linke",
+    "email": "noreply@die-linke.de"
+  },
   "homepage": "https://www.die-linke.de",
   "description": "Chat für Mitglieder der Linken"
 }
