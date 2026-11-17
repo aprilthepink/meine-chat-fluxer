@@ -17,8 +17,16 @@ checkout per context). For `--linux` it downloads Fluxer's patched Electron from
   - `FLUXER_LOCK_INSTANCE`: no instance picker or "change instance" in the login
   - `FLUXER_DEFAULT_PACKAGE_ORIGIN`: update server; must never be empty, or the app updates itself to official Fluxer
 - `brand/<ctx>/`: logo (white) and colour, same as in the Oxygen fork
+  - `brand.json`: colour, product name, fonts, wordmark text
+  - `wordmark.svg`/`.png`: generated from `brand.json` in Work Sans, regenerate with
+    `nix-shell -p librsvg 'python3.withPackages (ps: [ps.fonttools ps.uharfbuzz])' --run 'python3 whitelabel/tools/generate_wordmarks.py WorkSans[wght].ttf'`
+    (the PNG is uploaded to the instance by the Ansible role)
 - `desktop/icons/<ctx>/`: generated, regenerate with
   `nix-shell -p librsvg imagemagick python3 --run 'python3 whitelabel/tools/generate_desktop_icons.py'`
+- `desktop/brand.mjs` (run by `build.sh`): branding before sign-in, when the desktop has no instance config yet:
+  `PRODUCT_NAME`, wordmark in the title bar (also the startup title bar), and the theme colour and custom CSS
+  (fonts as data URLs) that the web app proxy would serve. After sign-in the instance's branding applies.
+- `fonts/`: Inter, Work Sans (SIL OFL 1.1), as in lissi.die-linke.de
 
 The desktop shell bundles `fluxer_app` as its renderer, so web app changes in this fork reach desktop users.
 Module updates (`FLUXER_MODULES`) stay off.

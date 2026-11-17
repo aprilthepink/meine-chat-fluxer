@@ -10,5 +10,13 @@
       " – Chat",
       400
     ]
-  ]
+  ],
+  "product_name": "Meine Linksjugend ['solid] – Chat",
+  "fonts": {
+    "heading": {
+      "family": "Work Sans",
+      "file": "WorkSans.woff2",
+      "letter_spacing": "-0.02em"
+    }
+  }
 }

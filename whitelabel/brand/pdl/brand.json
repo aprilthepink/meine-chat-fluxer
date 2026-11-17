@@ -10,5 +10,17 @@
       " – Chat",
       400
     ]
-  ]
+  ],
+  "product_name": "Meine Linke – Chat",
+  "fonts": {
+    "body": {
+      "family": "Inter",
+      "file": "InterVariable.woff2"
+    },
+    "heading": {
+      "family": "Work Sans",
+      "file": "WorkSans.woff2",
+      "letter_spacing": "-0.02em"
+    }
+  }
 }

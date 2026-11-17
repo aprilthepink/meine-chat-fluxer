@@ -16,6 +16,7 @@ export FLUXER_DESKTOP_BRAND="$dir/$ctx.json"
 export ELECTRON_ARCH="${ELECTRON_ARCH:-x64}"
 
 cp "$dir/icons/$ctx/"* "$root/fluxer_desktop/build_resources/icons-stable/"
+node "$dir/brand.mjs" "$ctx"
 
 if [[ " $* " == *" --linux "* && -z "${FLUXER_ELECTRON_DIST:-}" ]]; then
   arch="$ELECTRON_ARCH"
