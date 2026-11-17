@@ -13,6 +13,8 @@ variables:
   ELECTRON_CACHE: $CI_PROJECT_DIR/.cache/electron-download
   ELECTRON_BUILDER_CACHE: $CI_PROJECT_DIR/.cache/electron-builder
   USE_SYSTEM_FPM: "true"
+  ELECTRON_ARCH: x64
+  BUILD_VERSION: 0.1.$CI_PIPELINE_IID
 
 .desktop-linux:
   stage: build

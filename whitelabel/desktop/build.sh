@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Usage: whitelabel/desktop/build.sh <pdl|ljs> [electron-builder args, e.g. --linux]  (ELECTRON_ARCH, default x64)
+# Usage: whitelabel/desktop/build.sh <pdl|ljs> [electron-builder args, e.g. --linux]  (ELECTRON_ARCH default x64, BUILD_VERSION optional)
 set -euo pipefail
 
 ctx="${1:?usage: $0 <pdl|ljs> [electron-builder args]}"
@@ -13,11 +13,12 @@ set -a
 source "$dir/$ctx.env"
 set +a
 export FLUXER_DESKTOP_BRAND="$dir/$ctx.json"
+export ELECTRON_ARCH="${ELECTRON_ARCH:-x64}"
 
 cp "$dir/icons/$ctx/"* "$root/fluxer_desktop/build_resources/icons-stable/"
 
 if [[ " $* " == *" --linux "* && -z "${FLUXER_ELECTRON_DIST:-}" ]]; then
-  arch="${ELECTRON_ARCH:-x64}"
+  arch="$ELECTRON_ARCH"
   runtime="$root/fluxer_desktop/electron/runtime.json"
   read -r tag version sha < <(node -e '
     const r = require(process.argv[1]);
@@ -33,5 +34,8 @@ if [[ " $* " == *" --linux "* && -z "${FLUXER_ELECTRON_DIST:-}" ]]; then
 fi
 
 cd "$root/fluxer_desktop"
+if [[ -n "${BUILD_VERSION:-}" ]]; then
+  pnpm version "$BUILD_VERSION" --no-git-tag-version --allow-same-version
+fi
 NODE_ENV=production FLUXER_DESKTOP_PRODUCTION=true pnpm run build
 pnpm exec electron-builder --config electron-builder.config.cjs "$@"
