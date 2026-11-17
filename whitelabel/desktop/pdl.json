@@ -8,5 +8,8 @@
   "linuxDesktopId": "de.dielinke.meine.pdl",
   "linuxComment": "Chat für Mitglieder der Linken",
   "notarize": false,
-  "provisioningProfile": null
+  "provisioningProfile": null,
+  "author": "Die Linke <noreply@die-linke.de>",
+  "homepage": "https://www.die-linke.de",
+  "description": "Chat für Mitglieder der Linken"
 }

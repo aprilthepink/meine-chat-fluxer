@@ -8,5 +8,8 @@
   "linuxDesktopId": "de.dielinke.meine.ljs",
   "linuxComment": "Chat für Mitglieder der Linksjugend ['solid]",
   "notarize": false,
-  "provisioningProfile": null
+  "provisioningProfile": null,
+  "author": "Linksjugend ['solid] <noreply@linksjugend-solid.de>",
+  "homepage": "https://www.linksjugend-solid.de",
+  "description": "Chat für Mitglieder der Linksjugend ['solid]"
 }

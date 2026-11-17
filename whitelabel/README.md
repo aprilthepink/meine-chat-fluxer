@@ -38,6 +38,7 @@ No CI cache: the runners' cache URL is misconfigured (`https://https://...`).
 ## TODO
 
 - macOS icons (`_compiled/`, `AppIcon.icon`), Windows badges, tray icon for pdl is hard to read at 16px
+- Package maintainer is a placeholder (`noreply@…` in `desktop/<ctx>.json`)
 - Own update server, download page (`DOWNLOAD_PAGE_URLS`), deep link scheme (still `fluxer://`)
 - Windows/macOS builds and signing
 - Instance: stage (`fluxer.aprl2.bak-it-stage.de`) until production exists
