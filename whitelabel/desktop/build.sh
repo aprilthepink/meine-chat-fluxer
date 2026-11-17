@@ -35,7 +35,12 @@ fi
 
 cd "$root/fluxer_desktop"
 if [[ -n "${BUILD_VERSION:-}" ]]; then
-  pnpm version "$BUILD_VERSION" --no-git-tag-version --allow-same-version
+  node -e '
+    const fs = require("fs");
+    const pkg = JSON.parse(fs.readFileSync("package.json", "utf8"));
+    pkg.version = process.argv[1];
+    fs.writeFileSync("package.json", JSON.stringify(pkg, null, "\t") + "\n");
+  ' "$BUILD_VERSION"
 fi
 NODE_ENV=production FLUXER_DESKTOP_PRODUCTION=true pnpm run build
 pnpm exec electron-builder --config electron-builder.config.cjs "$@"
