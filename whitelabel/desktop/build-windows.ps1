@@ -18,7 +18,7 @@ $output = 'C:\b\out'
 New-Item -ItemType Directory -Force -Path $source, $output, 'C:\t', 'C:\ebcache' | Out-Null
 if ($Repository) {
     Invoke-Native git.exe @('-C', $source, 'init', '--quiet')
-    Invoke-Native git.exe @('-C', $source, 'fetch', '--quiet', '--depth', '1', $Repository, $Commit)
+    Invoke-Native git.exe @('-C', $source, '-c', 'credential.helper=', 'fetch', '--quiet', '--depth', '1', $Repository, $Commit)
     Invoke-Native git.exe @('-C', $source, 'checkout', '--quiet', 'FETCH_HEAD')
 } elseif (-not (Test-Path (Join-Path $source 'whitelabel'))) {
     throw "no -Repository given and no source in $source"
@@ -32,6 +32,7 @@ $env:ELECTRON_BUILDER_CACHE = 'C:\ebcache'
 $env:ELECTRON_ARCH = 'x64'
 $env:BUILD_VERSION = $Version
 $env:CI = 'true'
+$env:pnpm_config_script_shell = 'C:\Program Files\Git\bin\bash.exe'
 
 Import-Module 'C:\BuildTools\Common7\Tools\Microsoft.VisualStudio.DevShell.dll'
 Enter-VsDevShell -VsInstallPath 'C:\BuildTools' -SkipAutomaticLocation -DevCmdArguments '-arch=x64 -host_arch=x64' | Out-Null
