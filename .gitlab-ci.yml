@@ -54,3 +54,46 @@ desktop:linux:ljs:
   extends: .desktop-linux
   variables:
     CTX: ljs
+
+.desktop-windows:
+  stage: build
+  image: debian:trixie-slim
+  timeout: 3h
+  rules:
+    - if: $HCLOUD_TOKEN && $WINDOWS_BUILD_SSH_KEY && $WINDOWS_BUILD_KNOWN_HOSTS
+  variables:
+    HCLOUD_VERSION: "1.70.2"
+    HCLOUD_SHA256: b844bd28240112b0254183ba5266d0a0f59a6167c196636936459755efb88050
+  before_script:
+    - apt-get update -qq
+    - apt-get install -y -qq --no-install-recommends ca-certificates curl jq openssh-client >/dev/null
+    - curl -fsSL -o /tmp/hcloud.tar.gz "https://github.com/hetznercloud/cli/releases/download/v$HCLOUD_VERSION/hcloud-linux-amd64.tar.gz"
+    - echo "$HCLOUD_SHA256  /tmp/hcloud.tar.gz" | sha256sum -c -
+    - tar -xzf /tmp/hcloud.tar.gz -C /usr/local/bin hcloud
+  script:
+    - whitelabel/ci/windows-vm.sh up
+    - whitelabel/ci/windows-vm.sh run 'New-Item -ItemType Directory -Force -Path C:\b | Out-Null'
+    - whitelabel/ci/windows-vm.sh put whitelabel/desktop/build-windows.ps1 C:/b/build-windows.ps1
+    - >-
+      whitelabel/ci/windows-vm.sh run "powershell -NoProfile -ExecutionPolicy Bypass -File C:\\b\\build-windows.ps1
+      -Context $CTX -Repository '$CI_REPOSITORY_URL' -Commit $CI_COMMIT_SHA -Version $BUILD_VERSION"
+    - mkdir -p dist
+    - whitelabel/ci/windows-vm.sh get 'C:/b/out/*' dist/
+    - |
+      for file in dist/*; do
+        ls -lh "$file"
+        curl --fail-with-body --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file "$file" \
+          "$CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/generic/meine-$CTX-windows/$CI_PIPELINE_IID/$(basename "$file")"
+      done
+  after_script:
+    - whitelabel/ci/windows-vm.sh down
+
+desktop:windows:pdl:
+  extends: .desktop-windows
+  variables:
+    CTX: pdl
+
+desktop:windows:ljs:
+  extends: .desktop-windows
+  variables:
+    CTX: ljs
