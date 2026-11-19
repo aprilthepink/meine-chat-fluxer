@@ -18,6 +18,7 @@ $output = 'C:\b\out'
 New-Item -ItemType Directory -Force -Path $source, $output, 'C:\t', 'C:\ebcache' | Out-Null
 if ($Repository) {
     Invoke-Native git.exe @('-C', $source, 'init', '--quiet')
+    Invoke-Native git.exe @('-C', $source, 'config', 'core.eol', 'lf')
     Invoke-Native git.exe @('-C', $source, '-c', 'credential.helper=', 'fetch', '--quiet', '--depth', '1', $Repository, $Commit)
     Invoke-Native git.exe @('-C', $source, 'checkout', '--quiet', 'FETCH_HEAD')
 } elseif (-not (Test-Path (Join-Path $source 'whitelabel'))) {
