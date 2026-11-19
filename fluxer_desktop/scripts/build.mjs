@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import {execFileSync} from 'node:child_process';
+import {createHash} from 'node:crypto';
 import * as fs from 'node:fs';
 import {createRequire} from 'node:module';
 import * as path from 'node:path';
@@ -82,6 +83,30 @@ function readBuildUrl(name) {
 	}
 	return value;
 }
+const desktopIdentity = readRebrandedDesktopIdentity();
+function readRebrandedDesktopIdentity() {
+	const brandFile = (process.env.FLUXER_DESKTOP_BRAND || '').trim();
+	if (brandFile.length === 0) {
+		return '';
+	}
+	const brand = JSON.parse(fs.readFileSync(path.resolve(brandFile), 'utf8'));
+	return JSON.stringify({
+		appName: brand.productName,
+		appId: brand.appId,
+		linuxDesktopId: brand.linuxDesktopId,
+		packageName: brand.packageName,
+		author: typeof brand.author === 'string' ? brand.author.replace(/\s*[<(].*$/u, '') : brand.author?.name,
+		toastActivatorClsid: brand.appId ? nameBasedGuid(brand.appId) : undefined,
+	});
+}
+function nameBasedGuid(name) {
+	const dnsNamespace = Buffer.from('6ba7b8109dad11d180b400c04fd430c8', 'hex');
+	const hash = createHash('sha1').update(dnsNamespace).update(name).digest();
+	hash[6] = (hash[6] & 0x0f) | 0x50;
+	hash[8] = (hash[8] & 0x3f) | 0x80;
+	const hex = hash.subarray(0, 16).toString('hex').toUpperCase();
+	return `{${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}}`;
+}
 function buildInfoDefines() {
 	return {
 		[BUILD_CHANNEL_DEFINE]: JSON.stringify(buildChannel),
@@ -92,6 +117,7 @@ function buildInfoDefines() {
 		'process.env.FLUXER_DEFAULT_INSTANCE': JSON.stringify(defaultInstance),
 		'process.env.FLUXER_DEFAULT_PACKAGE_ORIGIN': JSON.stringify(defaultPackageOrigin),
 		'process.env.FLUXER_LOCK_INSTANCE': JSON.stringify(lockInstance ? '1' : ''),
+		'process.env.FLUXER_DESKTOP_IDENTITY': JSON.stringify(desktopIdentity),
 	};
 }
 const electronExternals = [
