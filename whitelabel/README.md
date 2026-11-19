@@ -5,7 +5,7 @@ Whitelabel builds of the Fluxer desktop app for Die Linke (`pdl`) and Linksjugen
 ```bash
 ./whitelabel/desktop/build.sh pdl --linux
 ./whitelabel/desktop/build.sh ljs --win
-./whitelabel/desktop/build.sh pdl --mac --universal -c.mac.identity=-   # on macOS
+./whitelabel/desktop/build.sh pdl --mac --universal -c.mac.sign.identity=-   # on macOS
 ```
 
 `build.sh` copies the context's icons over `fluxer_desktop/build_resources/icons-stable/` (tracked files, use a clean
