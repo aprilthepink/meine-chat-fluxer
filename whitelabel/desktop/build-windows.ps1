@@ -44,6 +44,28 @@ Invoke-Native 'C:\Program Files\Git\bin\bash.exe' @('whitelabel/desktop/build.sh
 
 $unpacked = Get-ChildItem -Directory -Path 'fluxer_desktop\dist-electron' -Filter 'win-*unpacked' | Select-Object -First 1
 if (-not $unpacked) { throw 'electron-builder produced no win-unpacked directory' }
-$name = "meine-$Context-windows-x64$(if ($Version) { "-$Version" }).zip"
-Invoke-Native tar.exe @('-a', '-c', '-f', (Join-Path $output $name), '-C', $unpacked.FullName, '.')
+$name = "meine-$Context-windows-x64$(if ($Version) { "-$Version" })"
+Invoke-Native tar.exe @('-a', '-c', '-f', (Join-Path $output "$name.zip"), '-C', $unpacked.FullName, '.')
+
+$brand = Get-Content -Raw "whitelabel\desktop\$Context.json" | ConvertFrom-Json
+$packVersion = (Get-Content -Raw 'fluxer_desktop\package.json' | ConvertFrom-Json).version
+$velopack = 'C:\t\velopack'
+Remove-Item -Recurse -Force -ErrorAction SilentlyContinue $velopack
+Invoke-Native vpk.exe @(
+    '--yes', 'pack',
+    '--packId', $brand.packageName,
+    '--packVersion', $packVersion,
+    '--packDir', $unpacked.FullName,
+    '--mainExe', "$($brand.productName).exe",
+    '--packTitle', $brand.productName,
+    '--packAuthors', $brand.author.name,
+    '--shortcuts', 'Desktop,StartMenuRoot',
+    '--runtime', 'win-x64',
+    '--icon', "whitelabel\desktop\icons\$Context\icon.ico",
+    '--delta', 'None',
+    '--outputDir', $velopack
+)
+$setup = Get-ChildItem -Path $velopack -Filter '*-Setup.exe' | Select-Object -First 1
+if (-not $setup) { throw 'vpk produced no Setup.exe' }
+Copy-Item $setup.FullName (Join-Path $output "$name-setup.exe")
 Get-ChildItem $output | ForEach-Object { "{0} {1:N0} MB" -f $_.Name, ($_.Length / 1MB) }

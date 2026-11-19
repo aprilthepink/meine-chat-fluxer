@@ -9,6 +9,7 @@
   "linuxComment": "Chat für Mitglieder der Linksjugend ['solid]",
   "notarize": false,
   "provisioningProfile": null,
+  "macEntitlements": "build_resources/entitlements.mac.development.plist",
   "author": {
     "name": "Linksjugend ['solid]",
     "email": "noreply@linksjugend-solid.de"

@@ -18,6 +18,15 @@ export ELECTRON_ARCH="${ELECTRON_ARCH:-x64}"
 cp "$dir/icons/$ctx/"* "$root/fluxer_desktop/build_resources/icons-stable/"
 node "$dir/brand.mjs" "$ctx"
 
+if [[ " $* " == *" --mac "* ]]; then
+  compiled="$root/fluxer_desktop/build_resources/icons-stable/_compiled"
+  rm -f "$compiled/Assets.car" "$compiled/AppIcon.icns"
+  xcrun actool "$dir/macos/$ctx/AppIcon.icon" --compile "$compiled" --app-icon AppIcon --include-all-app-icons \
+    --enable-on-demand-resources NO --development-region en --target-device mac --platform macosx \
+    --minimum-deployment-target 13.0 --output-partial-info-plist "$(mktemp -d)/AppIcon.plist" --errors --warnings
+  [[ -f "$compiled/Assets.car" && -f "$compiled/AppIcon.icns" ]] || { echo "actool produced no Assets.car/AppIcon.icns" >&2; exit 1; }
+fi
+
 if [[ " $* " == *" --linux "* && -z "${FLUXER_ELECTRON_DIST:-}" ]]; then
   arch="$ELECTRON_ARCH"
   runtime="$root/fluxer_desktop/electron/runtime.json"
